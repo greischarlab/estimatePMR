@@ -11,6 +11,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// beta_starts
+NumericVector beta_starts(const double& shape, const double& offset, const double& total0, const int& compartments);
+RcppExport SEXP _estimatePMR_beta_starts(SEXP shapeSEXP, SEXP offsetSEXP, SEXP total0SEXP, SEXP compartmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const double& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< const double& >::type total0(total0SEXP);
+    Rcpp::traits::input_parameter< const int& >::type compartments(compartmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(beta_starts(shape, offset, total0, compartments));
+    return rcpp_result_gen;
+END_RCPP
+}
 // constPMR_gammaN_ode
 arma::mat constPMR_gammaN_ode(const std::vector<double>& x0, const std::vector<double>& parms, const double& max_t, const double& dt);
 RcppExport SEXP _estimatePMR_constPMR_gammaN_ode(SEXP x0SEXP, SEXP parmsSEXP, SEXP max_tSEXP, SEXP dtSEXP) {
@@ -27,6 +41,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_estimatePMR_beta_starts", (DL_FUNC) &_estimatePMR_beta_starts, 4},
     {"_estimatePMR_constPMR_gammaN_ode", (DL_FUNC) &_estimatePMR_constPMR_gammaN_ode, 4},
     {NULL, NULL, 0}
 };

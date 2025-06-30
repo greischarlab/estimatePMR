@@ -65,15 +65,15 @@ Defaults to \code{stats::optim}.}
 \item{n_boxes}{Number of boxes. Defaults to \code{1000L}.}
 
 \item{n_fine}{Number of fine optimizations.
-Must be \verb{> n_boxes} and \verb{< n_polished}.
+Must be \verb{< n_boxes} and \verb{> n_polished}.
 Defaults to \code{100L}.}
 
 \item{n_polished}{Number of polished optimizations.
-Must be \verb{> n_fine}.
+Must be \verb{< n_fine}.
 Defaults to \code{20L}.}
 
 \item{n_outputs}{Number of top output object(s) to return.
-Must be \verb{> n_polished}. Defaults to \code{3L}.}
+Must be \verb{< n_polished}. Defaults to \code{3L}.}
 
 \item{extra_optims}{Number of potential extra rounds of optimizations to run
 if the best polished optimization still hasn't converged.

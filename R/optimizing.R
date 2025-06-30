@@ -93,13 +93,13 @@ run_optim <- function(.optim, .pars, .fn, .control, .fn_args) {
 #' @param n_bevals Number of evaluations of `fn` per box. Defaults to `100L`.
 #' @param n_boxes Number of boxes. Defaults to `1000L`.
 #' @param n_fine Number of fine optimizations.
-#'     Must be `> n_boxes` and `< n_polished`.
+#'     Must be `< n_boxes` and `> n_polished`.
 #'     Defaults to `100L`.
 #' @param n_polished Number of polished optimizations.
-#'     Must be `> n_fine`.
+#'     Must be `< n_fine`.
 #'     Defaults to `20L`.
 #' @param n_outputs Number of top output object(s) to return.
-#'     Must be `> n_polished`. Defaults to `3L`.
+#'     Must be `< n_polished`. Defaults to `3L`.
 #' @param extra_optims Number of potential extra rounds of optimizations to run
 #'     if the best polished optimization still hasn't converged.
 #'     Defaults to `10L`.

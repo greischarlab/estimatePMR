@@ -1,9 +1,10 @@
 Package: estimatePMR
-Title: What the Package Does (One Line, Title Case)
+Title: Estimate Parasite Multiplication Rates
 Version: 0.0.0.9000
 Authors@R: 
     person("Lucas", "Nell", , "lucnell@gmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: This package uses a "winnowing" optimization approach to estimate
+    Parasite Multiplication Rates (PMRs) for malaria parasites based on data.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

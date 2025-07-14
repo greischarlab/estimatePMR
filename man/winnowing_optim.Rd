@@ -20,7 +20,8 @@ winnowing_optim(
   n_fine = 100L,
   n_polished = 20L,
   n_outputs = 3L,
-  extra_optims = 10L
+  extra_optims = 10L,
+  na_stop = FALSE
 )
 }
 \arguments{
@@ -78,6 +79,12 @@ Must be \verb{< n_polished}. Defaults to \code{3L}.}
 \item{extra_optims}{Number of potential extra rounds of optimizations to run
 if the best polished optimization still hasn't converged.
 Defaults to \code{10L}.}
+
+\item{na_stop}{Single logical for whether to return the matrix of initial
+evaluations in each box if it contains \code{NA}s.
+If \code{FALSE}, the optimizer ignores these values and continues on
+(unless they're all \code{NA}).
+Defaults to \code{FALSE}.}
 }
 \value{
 A list containing \code{n_outputs} object(s) of the class returned

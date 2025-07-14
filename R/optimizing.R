@@ -103,6 +103,11 @@ run_optim <- function(.optim, .pars, .fn, .control, .fn_args) {
 #' @param extra_optims Number of potential extra rounds of optimizations to run
 #'     if the best polished optimization still hasn't converged.
 #'     Defaults to `10L`.
+#' @param na_stop Single logical for whether to return the matrix of initial
+#'     evaluations in each box if it contains `NA`s.
+#'     If `FALSE`, the optimizer ignores these values and continues on
+#'     (unless they're all `NA`).
+#'     Defaults to `FALSE`.
 #'
 #' @importFrom stats optim
 #'
@@ -127,7 +132,8 @@ winnowing_optim <- function(fn,
                             n_fine = 100L,
                             n_polished = 20L,
                             n_outputs = 3L,
-                            extra_optims = 10L) {
+                            extra_optims = 10L,
+                            na_stop = FALSE) {
 
 
     # Type and length checks:
@@ -147,6 +153,7 @@ winnowing_optim <- function(fn,
     stopifnot(length(n_polished) == 1L && as.integer(n_polished) == n_polished)
     stopifnot(length(n_outputs) == 1L && as.integer(n_outputs) == n_outputs)
     stopifnot(length(extra_optims) == 1L && as.integer(extra_optims) == extra_optims)
+    stopifnot(length(na_stop) == 1L && inherits(na_stop, "logical"))
 
     # Value checks:
     stopifnot(all(lower_bounds < upper_bounds))
@@ -180,7 +187,20 @@ winnowing_optim <- function(fn,
             .val <- do.call(fn, c(list(.pars), fn_args))
             evals_i[j,] <- c(.pars, .val)
         }
-        best_idx <- which(evals_i[,n_pars+1] == min(evals_i[,n_pars+1]))[[1]]
+        if (any(is.na(evals_i[,n_pars+1])) && na_stop) {
+            warning(sprintf(paste("\nThere were NAs in the %ith box.",
+                                  "The matrix of parameter values and",
+                                  "evaluations is being returned."), i))
+            return(evals_i)
+        }
+        if (all(is.na(evals_i[,n_pars+1]))) {
+            warning(sprintf(paste("\nThe %ith box was all NAs!",
+                                  "The matrix of parameter values and",
+                                  "evaluations is being returned."), i))
+            return(evals_i)
+        }
+
+        best_idx <- which(evals_i[,n_pars+1] == min(evals_i[,n_pars+1], na.rm = TRUE))[[1]]
         best_pars <- evals_i[best_idx, 1:n_pars]
         op <- run_optim(box_optim, best_pars, fn, box_control, fn_args)
 

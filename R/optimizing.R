@@ -13,6 +13,17 @@ get_val <- function(.op, .pkg) {
     }
     return(val)
 }
+# Get convergence code
+get_converge_code <- function(.op, .pkg) {
+    if (.pkg == "minqa") {
+        conv_code <- .op$ierr
+    } else if (.pkg == "nloptr") {
+        conv_code <- .op$convergence
+    } else {
+        conv_code <- .op$convergence
+    }
+    return(conv_code)
+}
 # Get whether an optimization has converged.
 get_converged <- function(.op, .pkg) {
     if (.pkg == "minqa") {
@@ -66,7 +77,12 @@ run_optim <- function(.optim, .pars, .fn, .control, .fn_args) {
 #'
 #' @param fn Objective function to minimize.
 #' @param lower_bounds Lower bounds of boxes for each parameter.
+#'     If this vector has names, these names are used for column names in
+#'     intermediate output tables (arguments starting with `file_` below).
+#'     If names are present, they must match those in `upper_bounds`,
+#'     but don't need to be in the same order.
 #' @param upper_bounds Upper bounds of boxes for each parameter.
+#'     See `lower_bounds` for providing names for this vector.
 #' @param fn_args List containing other arguments to use for `fn`.
 #'     Defaults to `list()`.
 #' @param box_control List containing arguments to use for the `control`
@@ -100,9 +116,36 @@ run_optim <- function(.optim, .pars, .fn, .control, .fn_args) {
 #'     Defaults to `20L`.
 #' @param n_outputs Number of top output object(s) to return.
 #'     Must be `< n_polished`. Defaults to `3L`.
-#' @param extra_optims Number of potential extra rounds of optimizations to run
-#'     if the best polished optimization still hasn't converged.
-#'     Defaults to `10L`.
+#' @param file_bevals Single string specifying the filename where to save the
+#'     output from the box evaluations step.
+#'     The output is a table with the box number (column `box`),
+#'     parameter values (named based on bounds arguments or `par1`, `par2`, ...),
+#'     and output from objective function at those values (`val`).
+#'     If the file ends with `.txt`, the output will be tab-delimited,
+#'     and if the file ends with `.csv`, the output will be comma-delimited.
+#'     Other extensions are not allowed.
+#'     An error will trigger if attempting to overwrite an existing file
+#'     unless the `overwrite` argument is set to `TRUE`.
+#'     If `NULL` (the default), no output is written.
+#' @param file_boxes Single string specifying the filename where to save the
+#'     output from the box evaluations step.
+#'     The output is a table with the starting parameter values (with `_start` suffix),
+#'     ending parameter values (with `_end` suffix),
+#'     convergence code for optimization (`conv_code`), and
+#'     output from objective function ending parameter values (`val`).
+#'     See description of argument `file_bevals` above for file extensions and
+#'     overwriting.
+#'     If `NULL` (the default), no output is written.
+#' @param file_fine Single string specifying the filename where to save the
+#'     output from the box evaluations step.
+#'     The output is a table with the same columns as for `file_boxes`
+#'     (see above).
+#'     See description of argument `file_bevals` above for file extensions and
+#'     overwriting.
+#'     If `NULL` (the default), no output is written.
+#' @param overwrite A single logical for whether to allow overwriting files
+#'     for intermediate output (arguments to this function starting
+#'     with `file_`). Defaults to `FALSE`.
 #' @param na_stop Single logical for whether to return the matrix of initial
 #'     evaluations in each box if it contains `NA`s.
 #'     If `FALSE`, the optimizer ignores these values and continues on
@@ -110,10 +153,23 @@ run_optim <- function(.optim, .pars, .fn, .control, .fn_args) {
 #'     Defaults to `FALSE`.
 #'
 #' @importFrom stats optim
+#' @importFrom tools file_ext
 #'
 #' @returns A list containing `n_outputs` object(s) of the class returned
 #'     by `polished_optim`.
 #'
+#'
+#' @example
+#' # "Continuous location planning problem with Manhattan metric"
+#' # From https://ds-pl-r-book.netlify.app/optimization-in-r.html
+#' fn <- function(loc, a, x, y) sum(a * (abs(x - loc[1]) + abs(y - loc[2]) ) )
+#' n <- 100
+#' a.vec <- sample(1:100, size = n)    # sample weights for each point/customer
+#' x.vec <- rnorm(n)                   # sample x coordinates
+#' y.vec <- rnorm(n)                   # sample y coordinates
+#'
+#' res <- winnowing_optim(fn, lower_bounds = rep(-1, 2), upper_bounds = rep(1, 2),
+#'                        fn_args = list(a = a.vec, x = x.vec , y = y.vec))
 #'
 #' @export
 #'
@@ -132,9 +188,11 @@ winnowing_optim <- function(fn,
                             n_fine = 100L,
                             n_polished = 20L,
                             n_outputs = 3L,
-                            extra_optims = 10L,
+                            file_bevals = NULL,
+                            file_boxes = NULL,
+                            file_fine = NULL,
+                            overwrite = FALSE,
                             na_stop = FALSE) {
-
 
     # Type and length checks:
     stopifnot(is.function(fn))
@@ -152,8 +210,8 @@ winnowing_optim <- function(fn,
     stopifnot(length(n_fine) == 1L && as.integer(n_fine) == n_fine)
     stopifnot(length(n_polished) == 1L && as.integer(n_polished) == n_polished)
     stopifnot(length(n_outputs) == 1L && as.integer(n_outputs) == n_outputs)
-    stopifnot(length(extra_optims) == 1L && as.integer(extra_optims) == extra_optims)
     stopifnot(length(na_stop) == 1L && inherits(na_stop, "logical"))
+    stopifnot(length(overwrite) == 1L && inherits(overwrite, "logical"))
 
     # Value checks:
     stopifnot(all(lower_bounds < upper_bounds))
@@ -162,7 +220,45 @@ winnowing_optim <- function(fn,
     stopifnot(n_fine > 0L && n_fine < n_boxes)
     stopifnot(n_polished > 0L && n_polished < n_fine)
     stopifnot(n_outputs > 0L && n_outputs < n_polished)
-    stopifnot(extra_optims >= 0L)
+
+    # Checking for names in one or more `_bounds` objects:
+    if ((!is.null(names(lower_bounds)) && is.null(names(upper_bounds))) ||
+        (is.null(names(lower_bounds)) && !is.null(names(upper_bounds)))) {
+        stop("If `lower_bounds` is named, `upper_bounds` should be too, ",
+             "and vice versa")
+    }
+    # If they are named, make sure they're the same and in the same order,
+    # and use these for `par_names` (used for output) if present
+    if (!is.null(names(lower_bounds))) {
+        par_names <- names(lower_bounds)
+        if (!identical(sort(par_names), sort(names(upper_bounds)))) {
+            stop("Names for `lower_bounds` and `upper_bounds` must be the same ",
+                 "(order doesn't matter)")
+        }
+        upper_bounds <- upper_bounds[par_names]
+    } else par_names <- paste0("par", 1:length(lower_bounds))
+
+    # Check validity of intermediate file names:
+    interm_files <- list("file_bevals" = file_bevals, "file_boxes" = file_boxes,
+                         "file_fine" = file_fine)
+    for (n in names(interm_files)) {
+        if (!is.null(interm_files[[n]])) {
+            if (length(interm_files[[n]]) != 1 || !is.character(interm_files[[n]])) {
+                stop(sprintf("Argument `%s` should be NULL or a single string", n))
+            }
+            if (! file_ext(interm_files[[n]]) %in% c("txt", "csv")) {
+                stop(sprintf("Extension for argument `%s` should be 'txt' or 'csv'", n))
+            }
+            if (!dir.exists(dirname(interm_files[[n]]))) {
+                stop(sprintf("Directory '%s' does not exist for argument `%s`",
+                             dirname(interm_files[[n]]), n))
+            }
+            if (!overwrite && file.exists(interm_files[[n]])) {
+                stop(paste0("File for argument `", n, "` ('", interm_files[[n]],
+                            "') already exists and `overwrite` is `FALSE`"))
+            }
+        }
+    }
 
 
     pkgs <- list(box = packageName(environment(box_optim)),
@@ -178,51 +274,71 @@ winnowing_optim <- function(fn,
     steps <- (upper_bounds - mids) / n_boxes
     n_pars <- length(mids)
 
-    box_evals <- matrix(0.0, n_boxes, n_pars+1)
-    evals_i <- matrix(0.0, n_bevals, n_pars+1)
+    box_optims <- matrix(0.0, n_boxes, 2*n_pars+2)
+    colnames(box_optims) <- c(paste0(par_names, "_start"),
+                             paste0(par_names, "_end"), "conv_code", "val")
+    evals_i <- matrix(0.0, n_bevals, n_pars+2)
+    colnames(evals_i) <- c("box", par_names, "val")
 
     for (i in 1:n_boxes) {
         for (j in 1:n_bevals) {
             .pars <- runif(n_pars, mids - steps * i, mids + steps * i)
             .val <- do.call(fn, c(list(.pars), fn_args))
-            evals_i[j,] <- c(.pars, .val)
+            evals_i[j,] <- c(i, .pars, .val)
         }
-        if (any(is.na(evals_i[,n_pars+1])) && na_stop) {
+        if (any(is.na(evals_i[,"val"])) && na_stop) {
             warning(sprintf(paste("\nThere were NAs in the %ith box.",
                                   "The matrix of parameter values and",
                                   "evaluations is being returned."), i))
             return(evals_i)
         }
-        if (all(is.na(evals_i[,n_pars+1]))) {
+        if (all(is.na(evals_i[,"val"]))) {
             warning(sprintf(paste("\nThe %ith box was all NAs!",
                                   "The matrix of parameter values and",
                                   "evaluations is being returned."), i))
             return(evals_i)
         }
+        if (!is.null(file_bevals)) {
+            write.table(evals_i, file_bevals, append = i > 1, quote = FALSE,
+                        sep = ifelse(file_ext(file_bevals) == "txt", "\t", ","),
+                        row.names = FALSE, col.names = i == 1)
+        }
 
-        best_idx <- which(evals_i[,n_pars+1] == min(evals_i[,n_pars+1], na.rm = TRUE))[[1]]
-        best_pars <- evals_i[best_idx, 1:n_pars]
+        best_idx <- which(evals_i[,"val"] == min(evals_i[,"val"], na.rm = TRUE))[[1]]
+        best_pars <- unname(evals_i[best_idx, par_names])
         op <- run_optim(box_optim, best_pars, fn, box_control, fn_args)
 
-        box_evals[i,] <- c(best_pars, get_val(op, pkgs$box))
+        box_optims[i,] <- c(best_pars, op$par, get_converge_code(op, pkgs$box),
+                            get_val(op, pkgs$box))
     }
 
     # sort with lowest at the top:
-    box_evals <- box_evals[order(box_evals[,n_pars+1]),]
+    box_optims <- box_optims[order(box_optims[,"val"]),]
+    # Output if requested:
+    if (!is.null(file_boxes)) {
+        write.table(box_optims, file_boxes, quote = FALSE, row.names = FALSE,
+                    sep = ifelse(file_ext(file_boxes) == "txt", "\t", ","))
+    }
 
-    fines <- matrix(0.0, n_fine, ncol(box_evals))
+    fines <- matrix(0.0, n_fine, ncol(box_optims))
+    colnames(fines) <- colnames(box_optims)
     for (i in 1:n_fine) {
-        pars <- box_evals[i,1:n_pars]
+        pars <- unname(box_optims[i,paste0(par_names, "_end")])
         op <- run_optim(fine_optim, pars, fn, fine_control, fn_args)
-        fines[i,1:n_pars] <- pars
-        fines[i,n_pars+1] <- get_val(op, pkgs$fine)
+        fines[i,] <- c(pars, op$par, get_converge_code(op, pkgs$fine),
+                       get_val(op, pkgs$fine))
     }
     # sort with lowest at the top:
-    fines <- fines[order(fines[,n_pars+1]),]
+    fines <- fines[order(fines[,"val"]),]
+    # Output if requested:
+    if (!is.null(file_fine)) {
+        write.table(fines, file_fine, quote = FALSE, row.names = FALSE,
+                    sep = ifelse(file_ext(file_fine) == "txt", "\t", ","))
+    }
 
     # keep all optimizer output in this case:
     polished_op <- lapply(1:n_polished, \(i) {
-        pars <- fines[i,1:n_pars]
+        pars <- unname(fines[i,paste0(par_names, "_end")])
         op <- run_optim(polished_optim, pars, fn, polished_control, fn_args)
         return(op)
     })
@@ -234,15 +350,8 @@ winnowing_optim <- function(fn,
     best_ops <- polished_op[1:n_outputs]
     not_conv <- sapply(best_ops, \(o) !get_converged(o, pkgs$polished))
 
-    for (i in 1:n_outputs) {
-        eo <- as.integer(extra_optims)
-        while (eo > 0L && not_conv[i]) {
-            best_ops[[i]] <- run_optim(polished_optim, best_ops[[i]]$par, fn,
-                                       polished_control, fn_args)
-            not_conv[i] <- !get_converged(best_ops[[i]], pkgs$polished)
-            eo <- eo - 1L
-        }
-        if (not_conv[i]) warning("Final optimization ", i, " has not converged.")
+    for (i in which(not_conv)) {
+        warning("Final optimization ", i, " did not converged.")
     }
 
     return(best_ops)

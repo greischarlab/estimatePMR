@@ -20,16 +20,24 @@ winnowing_optim(
   n_fine = 100L,
   n_polished = 20L,
   n_outputs = 3L,
-  extra_optims = 10L,
+  file_bevals = NULL,
+  file_boxes = NULL,
+  file_fine = NULL,
+  overwrite = FALSE,
   na_stop = FALSE
 )
 }
 \arguments{
 \item{fn}{Objective function to minimize.}
 
-\item{lower_bounds}{Lower bounds of boxes for each parameter.}
+\item{lower_bounds}{Lower bounds of boxes for each parameter.
+If this vector has names, these names are used for column names in
+intermediate output tables (arguments starting with \code{file_} below).
+If names are present, they must match those in \code{upper_bounds},
+but don't need to be in the same order.}
 
-\item{upper_bounds}{Upper bounds of boxes for each parameter.}
+\item{upper_bounds}{Upper bounds of boxes for each parameter.
+See \code{lower_bounds} for providing names for this vector.}
 
 \item{fn_args}{List containing other arguments to use for \code{fn}.
 Defaults to \code{list()}.}
@@ -76,9 +84,39 @@ Defaults to \code{20L}.}
 \item{n_outputs}{Number of top output object(s) to return.
 Must be \verb{< n_polished}. Defaults to \code{3L}.}
 
-\item{extra_optims}{Number of potential extra rounds of optimizations to run
-if the best polished optimization still hasn't converged.
-Defaults to \code{10L}.}
+\item{file_bevals}{Single string specifying the filename where to save the
+output from the box evaluations step.
+The output is a table with the box number (column \code{box}),
+parameter values (named based on bounds arguments or \code{par1}, \code{par2}, ...),
+and output from objective function at those values (\code{val}).
+If the file ends with \code{.txt}, the output will be tab-delimited,
+and if the file ends with \code{.csv}, the output will be comma-delimited.
+Other extensions are not allowed.
+An error will trigger if attempting to overwrite an existing file
+unless the \code{overwrite} argument is set to \code{TRUE}.
+If \code{NULL} (the default), no output is written.}
+
+\item{file_boxes}{Single string specifying the filename where to save the
+output from the box evaluations step.
+The output is a table with the starting parameter values (with \verb{_start} suffix),
+ending parameter values (with \verb{_end} suffix),
+convergence code for optimization (\code{conv_code}), and
+output from objective function ending parameter values (\code{val}).
+See description of argument \code{file_bevals} above for file extensions and
+overwriting.
+If \code{NULL} (the default), no output is written.}
+
+\item{file_fine}{Single string specifying the filename where to save the
+output from the box evaluations step.
+The output is a table with the same columns as for \code{file_boxes}
+(see above).
+See description of argument \code{file_bevals} above for file extensions and
+overwriting.
+If \code{NULL} (the default), no output is written.}
+
+\item{overwrite}{A single logical for whether to allow overwriting files
+for intermediate output (arguments to this function starting
+with \code{file_}). Defaults to \code{FALSE}.}
 
 \item{na_stop}{Single logical for whether to return the matrix of initial
 evaluations in each box if it contains \code{NA}s.

@@ -9,20 +9,13 @@ winnowing_optim(
   lower_bounds,
   upper_bounds,
   fn_args = list(),
-  box_control = list(maxit = 100, reltol = 1e-04),
-  fine_control = list(maxit = 500, reltol = 1e-06),
-  polished_control = list(maxit = 1000, reltol = 1e-08),
-  box_optim = optim,
-  fine_optim = optim,
-  polished_optim = optim,
   n_bevals = 100L,
   n_boxes = 1000L,
-  n_fine = 100L,
-  n_polished = 20L,
-  n_outputs = 3L,
-  file_bevals = NULL,
-  file_boxes = NULL,
-  file_fine = NULL,
+  n_outputs = c(100L, 20L, 3L),
+  controls = list(list(maxit = 100, reltol = 1e-04), list(maxit = 500, reltol = 1e-06),
+    list(maxit = 1000, reltol = 1e-08)),
+  optimizers = c(optim, optim, optim),
+  file_names = NULL,
   overwrite = FALSE,
   na_stop = FALSE
 )
@@ -32,7 +25,7 @@ winnowing_optim(
 
 \item{lower_bounds}{Lower bounds of boxes for each parameter.
 If this vector has names, these names are used for column names in
-intermediate output tables (arguments starting with \code{file_} below).
+intermediate output tables (argument \code{file_names} below).
 If names are present, they must match those in \code{upper_bounds},
 but don't need to be in the same order.}
 
@@ -42,81 +35,63 @@ See \code{lower_bounds} for providing names for this vector.}
 \item{fn_args}{List containing other arguments to use for \code{fn}.
 Defaults to \code{list()}.}
 
-\item{box_control}{List containing arguments to use for the \code{control}
-argument for the optimization that occurs for each box.
-Defaults to \code{list(maxit = 100, reltol = 1e-4)}
-(these names are adjusted if using an optimizer other than \code{optim}).}
-
-\item{fine_control}{List containing arguments to use for the \code{control}
-argument for the fine optimizations.
-Defaults to \code{list(maxit = 500, reltol = 1e-6)}
-(these names are adjusted if using an optimizer other than \code{optim}).}
-
-\item{polished_control}{List containing arguments to use for the \code{control}
-argument for the polished optimizations.
-Defaults to \code{list(maxit = 1000, reltol = 1e-8)}
-(these names are adjusted if using an optimizer other than \code{optim}).}
-
-\item{box_optim}{Function to use for the optimization for each box.
-Must be \code{stats::optim} or a function from packages \code{minqa} or \code{nloptr}.
-Defaults to \code{stats::optim}.}
-
-\item{fine_optim}{Function to use for the fine optimizations.
-Must be \code{stats::optim} or a function from packages \code{minqa} or \code{nloptr}.
-Defaults to \code{stats::optim}.}
-
-\item{polished_optim}{Function to use for the polished optimizations.
-Must be \code{stats::optim} or a function from packages \code{minqa} or \code{nloptr}.
-Defaults to \code{stats::optim}.}
-
 \item{n_bevals}{Number of evaluations of \code{fn} per box. Defaults to \code{100L}.}
 
 \item{n_boxes}{Number of boxes. Defaults to \code{1000L}.}
 
-\item{n_fine}{Number of fine optimizations.
-Must be \verb{< n_boxes} and \verb{> n_polished}.
-Defaults to \code{100L}.}
+\item{n_outputs}{A numeric vector indicating the number of best-fitting
+optimization outputs from each optimization step to pass to the next one.
+Because the first step is the optimizations for the best evaluation per
+box, the first item in this vector must be \verb{<= n_boxes}.
+Because each optimization step is taking a number of fits from the
+previous step, each successive item in this vector must be less than
+or equal to the previous.
+The length of this vector must be \verb{>= 1} and
+must match the lengths of \code{controls},
+\code{optimizers}, and, if requested, \code{file_names}.
+Defaults \code{c(100L, 20L, 3L)}.}
 
-\item{n_polished}{Number of polished optimizations.
-Must be \verb{< n_fine}.
-Defaults to \code{20L}.}
+\item{controls}{A list where each item is a named list.
+Each list in the top-most list contains arguments to use for
+the \code{control} argument for the optimization that occurs for that step.
+The first step is the optimization for each box.
+The length of this vector must be \verb{>= 1} and  must match the lengths
+of \code{n_outputs}, \code{optimizers}, and, if requested, \code{file_names}.
+The default argument for this is
+\code{list(list(maxit = 100, reltol = 1e-4), list(maxit = 500, reltol = 1e-6), list(maxit = 1000, reltol = 1e-8))}.
+This results in three optimization steps that get increasingly
+polished.}
 
-\item{n_outputs}{Number of top output object(s) to return.
-Must be \verb{< n_polished}. Defaults to \code{3L}.}
+\item{optimizers}{A list of optimizer functions to use for each optimization step.
+The length of this vector must be \verb{>= 1} and  must match the lengths
+of \code{n_outputs}, \code{controls}, and, if requested, \code{file_names}.
+The default argument for this is \code{c(optim, optim, optim)}.
+This results in three optimization steps using \code{stats::optim}.}
 
-\item{file_bevals}{Single string specifying the filename where to save the
-output from the box evaluations step.
-The output is a table with the box number (column \code{box}),
-parameter values (named based on bounds arguments or \code{par1}, \code{par2}, ...),
-and output from objective function at those values (\code{val}).
-If the file ends with \code{.txt}, the output will be tab-delimited,
-and if the file ends with \code{.csv}, the output will be comma-delimited.
-Other extensions are not allowed.
-An error will trigger if attempting to overwrite an existing file
-unless the \code{overwrite} argument is set to \code{TRUE}.
-If \code{NULL} (the default), no output is written.}
-
-\item{file_boxes}{Single string specifying the filename where to save the
-output from the box evaluations step.
-The output is a table with the starting parameter values (with \verb{_start} suffix),
-ending parameter values (with \verb{_end} suffix),
-convergence code for optimization (\code{conv_code}), and
-output from objective function ending parameter values (\code{val}).
-See description of argument \code{file_bevals} above for file extensions and
-overwriting.
-If \code{NULL} (the default), no output is written.}
-
-\item{file_fine}{Single string specifying the filename where to save the
-output from the box evaluations step.
-The output is a table with the same columns as for \code{file_boxes}
-(see above).
-See description of argument \code{file_bevals} above for file extensions and
-overwriting.
+\item{file_names}{A character vector specifying the file name(s)
+where to save intermediate output.
+The first output is from box evaluations, and the subsequent ones
+are from all the optimizations except for the last one.
+To output all the results from the last optimizer step,
+change the last item of the \code{n_outputs} argument.
+If provided, this vector must be the same length as
+\code{n_outputs}, \code{controls}, and \code{optimizers}.
+If you want some output to be written and others not to be, just
+set the file names for the step(s) you don't want written to \code{NA}.
+For example, for the default 3 optimizations, if
+\code{file_names = c(NA, "file1.txt", "file2.txt")}, the first
+two optimization steps will be written to files, but the box
+evaluations will not be written.
+File names that end with \code{.txt} will be tab-delimited,
+and those that end with \code{.csv} will be comma-delimited.
+See \code{Details} above for info on the output from these files.
+Note that an error will trigger if attempting to overwrite an existing
+file unless the \code{overwrite} argument is set to \code{TRUE}.
 If \code{NULL} (the default), no output is written.}
 
 \item{overwrite}{A single logical for whether to allow overwriting files
-for intermediate output (arguments to this function starting
-with \code{file_}). Defaults to \code{FALSE}.}
+for intermediate output (the \code{file_names} argument to this function).
+Defaults to \code{FALSE}.}
 
 \item{na_stop}{Single logical for whether to return the matrix of initial
 evaluations in each box if it contains \code{NA}s.
@@ -125,9 +100,33 @@ If \code{FALSE}, the optimizer ignores these values and continues on
 Defaults to \code{FALSE}.}
 }
 \value{
-A list containing \code{n_outputs} object(s) of the class returned
-by \code{polished_optim}.
+A list containing \code{tail(n_outputs, 1)} object(s) of the class
+returned by the last optimization step.
 }
 \description{
 Winnowing optimization
+}
+\details{
+All output files are tables.
+The output for the box evaluations has the box number (column \code{box}),
+parameter values (named based on bounds arguments or \code{par1}, \code{par2}, ...),
+and output from objective function at those values (\code{val}).
+The output for optimizations include the
+starting parameter values (with \verb{_start} suffix),
+ending parameter values (with \verb{_end} suffix),
+convergence code for optimization (\code{conv_code}), and
+output from objective function ending parameter values (\code{val}).
+}
+\examples{
+# "Continuous location planning problem with Manhattan metric"
+# From https://ds-pl-r-book.netlify.app/optimization-in-r.html
+fn <- function(loc, a, x, y) sum(a * (abs(x - loc[1]) + abs(y - loc[2]) ) )
+n <- 100
+a.vec <- sample(1:100, size = n)    # sample weights for each point/customer
+x.vec <- rnorm(n)                   # sample x coordinates
+y.vec <- rnorm(n)                   # sample y coordinates
+
+res <- winnowing_optim(fn, lower_bounds = rep(-1, 2), upper_bounds = rep(1, 2),
+                       fn_args = list(a = a.vec, x = x.vec , y = y.vec))
+
 }

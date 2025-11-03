@@ -1,6 +1,6 @@
 Package: estimatePMR
 Title: Estimate Parasite Multiplication Rates
-Version: 0.0.0.9000
+Version: 0.0.0.1
 Authors@R: 
     person("Lucas", "Nell", , "lucnell@gmail.com", role = c("aut", "cre"))
 Description: This package uses a "winnowing" optimization approach to estimate
@@ -9,10 +9,15 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
 LinkingTo: 
     BH,
     dqrng,
     Rcpp,
     RcppArmadillo
 Imports: 
+    cli,
     Rcpp
+Suggests:
+    mirai

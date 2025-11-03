@@ -17,7 +17,10 @@ winnowing_optim(
   optimizers = c(optim, optim, optim),
   file_names = NULL,
   overwrite = FALSE,
-  na_stop = FALSE
+  na_stop = FALSE,
+  multithread = FALSE,
+  obj_env = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -98,6 +101,22 @@ evaluations in each box if it contains \code{NA}s.
 If \code{FALSE}, the optimizer ignores these values and continues on
 (unless they're all \code{NA}).
 Defaults to \code{FALSE}.}
+
+\item{multithread}{Number of threads to use via the \code{mirai} package.
+Note that \code{mirai} is a suggested package, so it's not installed with
+this package by default.
+If \code{mirai} is not installed, \code{multithread = TRUE} generates an error.
+See examples below and \code{?mirai::daemons} for how to use multithreading.
+Defaults to \code{FALSE}.}
+
+\item{obj_env}{Optional list or environment that contains all objects needed
+to run the objective function.
+This is only used (and necessary) if \code{multithread = TRUE}.
+See examples for how to use this and when it's necessary.
+Defaults to \code{NULL}.}
+
+\item{verbose}{Logical for whether to print messages when each step is
+started. Defaults to \code{FALSE}.}
 }
 \value{
 A list containing \code{tail(n_outputs, 1)} object(s) of the class
@@ -128,5 +147,26 @@ y.vec <- rnorm(n)                   # sample y coordinates
 
 res <- winnowing_optim(fn, lower_bounds = rep(-1, 2), upper_bounds = rep(1, 2),
                        fn_args = list(a = a.vec, x = x.vec , y = y.vec))
+
+\dontrun{
+# Example using two threads:
+# install.packages("mirai")
+# Set mirai daemons and seed for reproducibility:
+mirai::daemons(2, seed = 1)
+# When the objective function doesn't rely on global variables or user-defined
+# functions, then you can just run it with `multithread = TRUE`:
+res <- winnowing_optim(fn, lower_bounds = rep(-1, 2), upper_bounds = rep(1, 2),
+                       fn_args = list(a = a.vec, x = x.vec, y = y.vec),
+                       multithread = TRUE)
+# If we define a new version of the objective function that relies on
+# a user-defined function, `foo`, then we have to provide that function
+# in the argument `obj_env`:
+fn2 <- function(loc, a, x, y) sum(a * (foo(x, loc[1]) + foo(y, loc[2]) ) )
+foo <- function(xy, loc_i) abs(xy - loc_i)
+res2 <- winnowing_optim(fn2, lower_bounds = rep(-1, 2), upper_bounds = rep(1, 2),
+                       fn_args = list(a = a.vec, x = x.vec, y = y.vec),
+                       obj_env = list(foo = foo),
+                       multithread = TRUE)
+}
 
 }

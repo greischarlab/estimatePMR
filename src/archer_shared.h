@@ -1,0 +1,56 @@
+# ifndef __ESTIMATE_PMR_ARCHER_SHARED_H
+# define __ESTIMATE_PMR_ARCHER_SHARED_H
+
+
+#include <RcppArmadillo.h>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <boost/math/distributions/beta.hpp>
+#include "ode.h"
+#include "beta_starts.h"
+#include "constantPMR_gammaN.h"
+
+
+
+using namespace Rcpp;
+
+
+// Define the values of all parameters used inside yfx.
+constexpr double p1 = 11.3869 / 467.6209; // Lower bound
+constexpr double p2 = 1.0;               // Upper bound
+constexpr double p4 = 0.2242 * 2.0;      // Slope
+
+
+// Function to calculate yfx
+NumericVector yfx(const NumericVector& age, const double& inflec);
+
+// Function to subset rows of a matrix and return a NumericMatrix
+NumericMatrix subsetRows(const arma::mat& input, const int& step);
+
+// Repeat subvector a number of times
+NumericVector repeat_subvector(const NumericVector& x);
+
+
+int get_n(const double& x);
+
+
+double last_stage(const double& pfCycleLength,
+                  const double& R,
+                  const int& n,
+                  const double& inflec,
+                  const double& betaShape,
+                  const double& offset,
+                  const double& I0,
+                  const double& ring_duration,
+                  const DataFrame& data);
+
+
+
+
+
+
+
+#endif

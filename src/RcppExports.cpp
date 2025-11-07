@@ -11,6 +11,30 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// archer_fit7_odeint
+double archer_fit7_odeint(NumericVector parms, DataFrame data);
+RcppExport SEXP _estimatePMR_archer_fit7_odeint(SEXP parmsSEXP, SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type parms(parmsSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(archer_fit7_odeint(parms, data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// archer_fit8_odeint
+double archer_fit8_odeint(NumericVector parms, DataFrame data);
+RcppExport SEXP _estimatePMR_archer_fit8_odeint(SEXP parmsSEXP, SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type parms(parmsSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(archer_fit8_odeint(parms, data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // beta_starts
 NumericVector beta_starts(const double& shape, const double& offset, const double& total0, const int& compartments);
 RcppExport SEXP _estimatePMR_beta_starts(SEXP shapeSEXP, SEXP offsetSEXP, SEXP total0SEXP, SEXP compartmentsSEXP) {
@@ -41,6 +65,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_estimatePMR_archer_fit7_odeint", (DL_FUNC) &_estimatePMR_archer_fit7_odeint, 2},
+    {"_estimatePMR_archer_fit8_odeint", (DL_FUNC) &_estimatePMR_archer_fit8_odeint, 2},
     {"_estimatePMR_beta_starts", (DL_FUNC) &_estimatePMR_beta_starts, 4},
     {"_estimatePMR_constPMR_gammaN_ode", (DL_FUNC) &_estimatePMR_constPMR_gammaN_ode, 4},
     {NULL, NULL, 0}

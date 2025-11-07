@@ -1,6 +1,6 @@
 Package: estimatePMR
 Title: Estimate Parasite Multiplication Rates
-Version: 0.0.0.1
+Version: 0.0.0.2
 Authors@R: 
     person("Lucas", "Nell", , "lucnell@gmail.com", role = c("aut", "cre"))
 Description: This package uses a "winnowing" optimization approach to estimate

@@ -12,24 +12,24 @@ using namespace Rcpp;
 
 
 arma::mat constPMR_gammaN_ode_cpp(std::vector<double> x0,
-                                  const std::vector<double>& parms,
+                                  const double& cycleLength,
+                                  const double& mu,
+                                  const double& museq,
+                                  const double& R,
+                                  const int& n,
+                                  const double& inflec,
                                   const double& max_t,
                                   const double& dt) {
 
     if (max_t <= 0) stop("max_t must be > 0");
     if (dt >= max_t || dt <= 0) stop("dt must be < max_t and > 0");
 
-    if (parms.size() != 5U) stop("`parms` must be of length 5");
-    // The check below is important bc turning a negative double to an unsigned
-    // integer will result in a very large number (in this case, over 4e9).
-    if (parms[4] < 0) stop("5th element of `parms` cannot be < 0");
+    if (n < 0) stop("`n` cannot be < 0");
 
-    uint32_t n = static_cast<uint32_t>(parms[4]);
-    if (x0.size() != (2*n))
-        stop("`x0` must be twice length as the 5th element of `parms`");
+    if (x0.size() != (2*n)) stop("`x0` must be twice length as `n`");
 
     GreedyObserver<VecType> obs;
-    ConstantPMRgammaN system(parms);
+    ConstantPMRgammaN system(cycleLength, mu, museq, R, n, inflec);
 
     boost::numeric::odeint::integrate_const(
         VecStepperType(), std::ref(system),
@@ -53,9 +53,7 @@ arma::mat constPMR_gammaN_ode_cpp(std::vector<double> x0,
 
 //' Run ODE for constant PMR and gamma N.
 //'
-//' @param x0 Initial conditions for all stages (length should be `2*parms[5]`).
-//' @param parms Vector of length 5 containing parameter values.
-//'     Parameters in order: `cycleLength`, `mu`, `museq`, `R`, and `n`.
+//' @param x0 Initial conditions for all stages.
 //' @param Maximum time point to simulate to.
 //' @param Time step to use for ODE.
 //'
@@ -66,11 +64,17 @@ arma::mat constPMR_gammaN_ode_cpp(std::vector<double> x0,
 //'
 //[[Rcpp::export]]
 arma::mat constPMR_gammaN_ode(const std::vector<double>& x0,
-                              const std::vector<double>& parms,
+                              const double& cycleLength,
+                              const double& mu,
+                              const double& museq,
+                              const double& R,
+                              const int& n,
+                              const double& inflec,
                               const double& max_t,
                               const double& dt) {
 
-    arma::mat out = constPMR_gammaN_ode_cpp(x0, parms, max_t, dt);
+    arma::mat out = constPMR_gammaN_ode_cpp(x0, cycleLength, mu, museq,
+                                            R, n, inflec, max_t, dt);
 
     return out;
 

@@ -23,20 +23,21 @@ struct ConstantPMRgammaN {
     double inflec;
     arma::vec qValues;
 
-    ConstantPMRgammaN(const VecType& parms)
-        : cycleLength(parms[0]),
-          mu(parms[1]),
-          museq(parms[2]),
-          R(parms[3]),
-          n(static_cast<uint32_t>(parms[4])),
-          lambdaN(parms[4] / cycleLength),
+    ConstantPMRgammaN(const double& cycleLength_,
+                      const double& mu_,
+                      const double& museq_,
+                      const double& R_,
+                      const double& n_,
+                      const double& inflec_)
+        : cycleLength(cycleLength_),
+          mu(mu_),
+          museq(museq_),
+          R(R_),
+          n(static_cast<uint32_t>(n_)),
+          lambdaN(n_ / cycleLength),
           lambdaS(lambdaN),
-          inflec(),
+          inflec(inflec_),
           qValues(n, arma::fill::zeros) {
-
-        if (parms.size() >= 6) {
-            inflec = parms[5];
-        } else inflec = 18.5802 / 2.0;
 
         double dt = 1 / lambdaN;
         double yValue0 = yfx1(dt, inflec);
@@ -100,7 +101,12 @@ private:
 
 
 arma::mat constPMR_gammaN_ode_cpp(std::vector<double> x0,
-                                  const std::vector<double>& parms,
+                                  const double& cycleLength,
+                                  const double& mu,
+                                  const double& museq,
+                                  const double& R,
+                                  const int& n,
+                                  const double& inflec,
                                   const double& max_t,
                                   const double& dt);
 

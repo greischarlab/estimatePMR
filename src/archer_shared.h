@@ -24,28 +24,48 @@ constexpr double p2 = 1.0;               // Upper bound
 constexpr double p4 = 0.2242 * 2.0;      // Slope
 
 
+
+
+struct ArcherInfo {
+
+    double betaShape;
+    double offset;
+    double R;
+    double I0;
+    int n;
+    double pfCycleLength;
+    double inflec;
+    double ring_duration;
+
+};
+
+
+
+
+
 // Function to calculate yfx
-NumericVector yfx(const NumericVector& age, const double& inflec);
+arma::vec yfx(const arma::vec& age, const double& inflec);
 
 // Function to subset rows of a matrix and return a NumericMatrix
-NumericMatrix subsetRows(const arma::mat& input, const int& step);
+arma::mat subsetRows(const arma::mat& input, const int& step);
 
 // Repeat subvector a number of times
-NumericVector repeat_subvector(const NumericVector& x);
+arma::vec repeat_subvector(const arma::vec& x);
 
 
-int get_n(const double& x);
 
 
-double last_stage(const double& pfCycleLength,
-                  const double& R,
-                  const int& n,
-                  const double& inflec,
-                  const double& betaShape,
-                  const double& offset,
-                  const double& I0,
-                  const double& ring_duration,
-                  const DataFrame& data);
+
+
+// double last_stage(const double& pfCycleLength,
+//                   const double& R,
+//                   const int& n,
+//                   const double& inflec,
+//                   const double& betaShape,
+//                   const double& offset,
+//                   const double& I0,
+//                   const double& ring_duration,
+//                   const DataFrame& data);
 
 
 

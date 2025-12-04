@@ -4,13 +4,10 @@
 \alias{constPMR_gammaN_ode}
 \title{Run ODE for constant PMR and gamma N.}
 \usage{
-constPMR_gammaN_ode(x0, parms, max_t, dt)
+constPMR_gammaN_ode(x0, cycleLength, mu, museq, R, n, inflec, max_t, dt)
 }
 \arguments{
-\item{x0}{Initial conditions for all stages (length should be \code{2*parms[5]}).}
-
-\item{parms}{Vector of length 5 containing parameter values.
-Parameters in order: \code{cycleLength}, \code{mu}, \code{museq}, \code{R}, and \code{n}.}
+\item{x0}{Initial conditions for all stages.}
 
 \item{Maximum}{time point to simulate to.}
 

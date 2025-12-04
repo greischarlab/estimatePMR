@@ -38,6 +38,29 @@ extract_parms <- function(parms, pfCycleLength = NA_real_, inflec = NA_real_, ri
     .Call(`_estimatePMR_extract_parms`, parms, pfCycleLength, inflec, ring_duration)
 }
 
+#' Main optimization function for model with 5-8 parameters.
+#'
+#' @param parms A numeric vector of parameter values.
+#' @param data A dataframe containing necessary data (columns
+#'     `"Circ"` and `"ring_prop"`).
+#' @param pfCycleLength Single numeric indicating the cycle length.
+#'     Defaults to `NA`, which results in it being extracted from `parms`.
+#' @param inflec Single numeric indicating the inflection point.
+#'     Defaults to `NA`, which results in it being extracted from `parms`.
+#' @param ring_duration Single numeric indicating the ring duration.
+#'     Defaults to `NA`, which results in it being extracted from `parms`.
+#' @param circ_return Single logical indicating whether to output
+#'     circulating iRBCs.
+#'     Defaults to `FALSE`.
+#' @param seq_return Single logical indicating whether to output
+#'     sequestered iRBCs.
+#'     Defaults to `FALSE`.
+#' @param ring_prop_return Single logical indicating whether to output
+#'     ring proportions.
+#'     Defaults to `FALSE`.
+#'
+#' @export
+#'
 archer_fitN_odeint <- function(parms, data, pfCycleLength = NA_real_, inflec = NA_real_, ring_duration = NA_real_, circ_return = FALSE, seq_return = FALSE, ring_prop_return = FALSE) {
     .Call(`_estimatePMR_archer_fitN_odeint`, parms, data, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return)
 }

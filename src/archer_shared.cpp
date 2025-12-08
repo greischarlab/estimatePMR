@@ -8,69 +8,119 @@ using namespace Rcpp;
 
 // Function to calculate yfx
 arma::vec yfx(const arma::vec& age, const double& inflec) {
-    int n = age.size();
-    arma::vec yVals(n);
-
-    for (int i = 0; i < n; ++i) {
-        // Use Rcpp's `pow` for element-wise calculation
-        yVals[i] = 1 - (p1 + ((p2 - p1) / (1 + std::pow(10, p4 * (inflec - age[i])))));
-    }
-    return yVals;
+  int n = age.size();
+  arma::vec yVals(n);
+  
+  for (int i = 0; i < n; ++i) {
+    // Use Rcpp's `pow` for element-wise calculation
+    yVals[i] = 1 - (p1 + ((p2 - p1) / (1 + std::pow(10, p4 * (inflec - age[i])))));
+  }
+  return yVals;
 }
 
 
 // Function to subset rows of a list
 // Function to subset rows of a matrix and return a NumericMatrix
-arma::mat subsetRows(const arma::mat& input, const int& step) {
+arma::mat subsetRows(const arma::mat& input, int step, const bool& geno) {
+  if (geno == true){ // If the dataset is the genotype ones
     int n_rows = input.n_rows;
     if (n_rows == 0) {
-        return arma::mat(0, 0);  // Return an empty matrix if input is empty
-    }
-
+      return arma::mat(0, 0);  // Return an empty matrix if input is empty
+    } 
+    
     // Calculate the number of rows in the subset
     int subset_n_rows = (n_rows + step - 1) / step;
 
     // Initialize a arma::mat to store the subset
     arma::mat subset(subset_n_rows, input.n_cols);
-
+  
     // Fill the subset matrix
     for (int col = 0; col < input.n_cols; col++) {
-        int row = 0; // Reset row counter for each column
-        for (int i = 0; i < n_rows; i += step) {
-            if (row >= subset_n_rows) {
-                break; // Prevent out-of-bounds access
-            }
-            subset(row, col) = input(i, col);
-            row++;
+      int row = 0; // Reset row counter for each column
+      for (int i = 0; i < n_rows; i += step) {
+        if (row >= subset_n_rows) {
+          break; // Prevent out-of-bounds access
         }
+        subset(row, col) = input(i, col);
+        row++;
+      }
     }
     return subset;
-}
+  }else{ // If the datasets are the mistimed treatment groups
+    int n_rows = input.n_rows;
+    if (n_rows == 0) {
+      return NumericMatrix(0, 0);  // Return an empty matrix if input is empty
+    }  
+    
+    // Calculate the number of rows in the subset
+    int subset_n_rows = (n_rows -5 + step -1) / step;
+    
+    // Initialize a NumericMatrix to store the subset
+    NumericMatrix subset(subset_n_rows, input.n_cols);
+    
+    // Fill the subset matrix
+    for (int col = 0; col < input.n_cols; ++col) {
+      arma::vec col_data = input.col(col);
+      int row = 0; // Reset row counter for each column
+      for (int i = 5; i < n_rows; i += step) {
+        if (row >= subset_n_rows) {
+          break; // Prevent out-of-bounds access
+        } 
+        subset(row, col) = col_data(i);
+        ++row;
+      } 
+    }
+    return subset;
+  }
+}  
 
 
 
 
-arma::vec repeat_subvector(const arma::vec& x) {
+arma::vec repeat_subvector(const NumericVector& x, const bool& geno) {
+  if (geno == true){
     std::vector<int> reps = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                              6, 6, 6, 6, 6, 6, 6,
                              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6};
-
+     
     int totalSize = 146;
-
+     
     // Create the output vector
     arma::vec result(totalSize);
-
+     
     // Fill the output vector with repeated values
     int index = 0;
     for (int i = 0; i < x.size(); i++) {
-        for (int j = 0; j < reps[i]; j++) {
-            result[index] = x[i];
-            index++;
-        }
-    }
-
+      for (int j = 0; j < reps[i]; j++) {
+        result[index] = x[i];
+        index++;
+      }
+    } 
+    
     return result;
-}
+  } else{
+    std::vector<int> reps = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                             4, 4, 4, 4, 4, 4, 8, 8,
+                             4, 4, 4, 4, 8, 8,
+                             4, 4, 4, 4, 8, 8, 
+                             4, 4, 4};
+    
+    int totalSize = 126;
+    
+    // Create the output vector
+    NumericVector result(totalSize);
+    
+    // Fill the output vector with repeated values
+    int index = 0;
+    for (int i = 0; i < x.size(); i++) {
+      for (int j = 0; j < reps[i]; j++) {
+        result[index++] = x[i];
+      }
+    } 
+    
+    return result;
+  }
+}  
 
 
 
@@ -226,5 +276,4 @@ arma::vec repeat_subvector(const arma::vec& x) {
 //     return sse;
 //
 // }
-
 

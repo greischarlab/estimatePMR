@@ -27,16 +27,16 @@ constexpr double p4 = 0.2242 * 2.0;      // Slope
 
 
 struct ArcherInfo {
-
-    double betaShape;
-    double offset;
-    double R;
-    double I0;
-    int n;
-    double pfCycleLength;
-    double inflec;
-    double ring_duration;
-
+  
+  double betaShape;
+  double offset;
+  double R;
+  double I0;
+  int n;
+  double pfCycleLength;
+  double inflec;
+  double ring_duration;
+  
 };
 
 
@@ -47,10 +47,10 @@ struct ArcherInfo {
 arma::vec yfx(const arma::vec& age, const double& inflec);
 
 // Function to subset rows of a matrix and return a NumericMatrix
-arma::mat subsetRows(const arma::mat& input, const int& step);
+arma::mat subsetRows(const arma::mat& input, const int& step, const bool& geno);
 
 // Repeat subvector a number of times
-arma::vec repeat_subvector(const arma::vec& x);
+arma::vec repeat_subvector(const arma::vec& x, const bool& geno);
 
 
 

@@ -7,6 +7,7 @@
 archer_fitN_odeint(
   parms,
   data,
+  geno,
   pfCycleLength = NA_real_,
   inflec = NA_real_,
   ring_duration = NA_real_,

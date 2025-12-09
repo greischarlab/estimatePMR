@@ -59,20 +59,21 @@ BEGIN_RCPP
 END_RCPP
 }
 // archer_fitN_odeint
-SEXP archer_fitN_odeint(NumericVector parms, DataFrame data, const double& pfCycleLength, const double& inflec, const double& ring_duration, const bool& circ_return, const bool& seq_return, const bool& ring_prop_return);
-RcppExport SEXP _estimatePMR_archer_fitN_odeint(SEXP parmsSEXP, SEXP dataSEXP, SEXP pfCycleLengthSEXP, SEXP inflecSEXP, SEXP ring_durationSEXP, SEXP circ_returnSEXP, SEXP seq_returnSEXP, SEXP ring_prop_returnSEXP) {
+SEXP archer_fitN_odeint(NumericVector parms, DataFrame data, const bool& geno, const double& pfCycleLength, const double& inflec, const double& ring_duration, const bool& circ_return, const bool& seq_return, const bool& ring_prop_return);
+RcppExport SEXP _estimatePMR_archer_fitN_odeint(SEXP parmsSEXP, SEXP dataSEXP, SEXP genoSEXP, SEXP pfCycleLengthSEXP, SEXP inflecSEXP, SEXP ring_durationSEXP, SEXP circ_returnSEXP, SEXP seq_returnSEXP, SEXP ring_prop_returnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type parms(parmsSEXP);
     Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type geno(genoSEXP);
     Rcpp::traits::input_parameter< const double& >::type pfCycleLength(pfCycleLengthSEXP);
     Rcpp::traits::input_parameter< const double& >::type inflec(inflecSEXP);
     Rcpp::traits::input_parameter< const double& >::type ring_duration(ring_durationSEXP);
     Rcpp::traits::input_parameter< const bool& >::type circ_return(circ_returnSEXP);
     Rcpp::traits::input_parameter< const bool& >::type seq_return(seq_returnSEXP);
     Rcpp::traits::input_parameter< const bool& >::type ring_prop_return(ring_prop_returnSEXP);
-    rcpp_result_gen = Rcpp::wrap(archer_fitN_odeint(parms, data, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return));
+    rcpp_result_gen = Rcpp::wrap(archer_fitN_odeint(parms, data, geno, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -81,7 +82,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_estimatePMR_beta_starts", (DL_FUNC) &_estimatePMR_beta_starts, 4},
     {"_estimatePMR_constPMR_gammaN_ode", (DL_FUNC) &_estimatePMR_constPMR_gammaN_ode, 9},
     {"_estimatePMR_extract_parms", (DL_FUNC) &_estimatePMR_extract_parms, 4},
-    {"_estimatePMR_archer_fitN_odeint", (DL_FUNC) &_estimatePMR_archer_fitN_odeint, 8},
+    {"_estimatePMR_archer_fitN_odeint", (DL_FUNC) &_estimatePMR_archer_fitN_odeint, 9},
     {NULL, NULL, 0}
 };
 

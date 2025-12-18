@@ -20,6 +20,7 @@ using namespace Rcpp;
 
 
 
+
 ArcherInfo extract_parms_cpp(const NumericVector& parms,
                              const double& pfCycleLength,
                              const double& inflec,

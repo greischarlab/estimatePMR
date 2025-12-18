@@ -43,6 +43,10 @@ extract_parms <- function(parms, pfCycleLength = NA_real_, inflec = NA_real_, ri
 #' @param parms A numeric vector of parameter values.
 #' @param data A dataframe containing necessary data (columns
 #'     `"Circ"` and `"ring_prop"`).
+#' @param geno Decides which dataset is being optimized (if set as false,
+#'     then the function is fitting the data from O'Donnell et al., Parasite
+#'     Immunology, 2021; if set as true, then the function is fitting the data
+#'     from Prior et al., Scientifc Reports, 2019).
 #' @param pfCycleLength Single numeric indicating the cycle length.
 #'     Defaults to `NA`, which results in it being extracted from `parms`.
 #' @param inflec Single numeric indicating the inflection point.

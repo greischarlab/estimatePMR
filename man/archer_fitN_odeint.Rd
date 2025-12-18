@@ -23,6 +23,11 @@ archer_fitN_odeint(
 \item{data}{A dataframe containing necessary data (columns
 \code{"Circ"} and \code{"ring_prop"}).}
 
+\item{geno}{Decides which dataset is being optimized (if set as false,
+then the function is fitting the data from O'Donnell et al., Parasite
+Immunology, 2021; if set as true, then the function is fitting the data
+from Prior et al., Scientifc Reports, 2019).}
+
 \item{pfCycleLength}{Single numeric indicating the cycle length.
 Defaults to \code{NA}, which results in it being extracted from \code{parms}.}
 

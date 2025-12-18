@@ -13,7 +13,8 @@ archer_fitN_odeint(
   ring_duration = NA_real_,
   circ_return = FALSE,
   seq_return = FALSE,
-  ring_prop_return = FALSE
+  ring_prop_return = FALSE,
+  output_full_return = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,10 @@ Defaults to \code{FALSE}.}
 
 \item{ring_prop_return}{Single logical indicating whether to output
 ring proportions.
+Defaults to \code{FALSE}.}
+
+\item{output_full_return}{Single logical indicating whether to output
+full ODE output.
 Defaults to \code{FALSE}.}
 }
 \description{

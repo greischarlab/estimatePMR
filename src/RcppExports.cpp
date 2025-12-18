@@ -59,8 +59,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // archer_fitN_odeint
-SEXP archer_fitN_odeint(NumericVector parms, DataFrame data, const bool& geno, const double& pfCycleLength, const double& inflec, const double& ring_duration, const bool& circ_return, const bool& seq_return, const bool& ring_prop_return);
-RcppExport SEXP _estimatePMR_archer_fitN_odeint(SEXP parmsSEXP, SEXP dataSEXP, SEXP genoSEXP, SEXP pfCycleLengthSEXP, SEXP inflecSEXP, SEXP ring_durationSEXP, SEXP circ_returnSEXP, SEXP seq_returnSEXP, SEXP ring_prop_returnSEXP) {
+SEXP archer_fitN_odeint(NumericVector parms, DataFrame data, const bool& geno, const double& pfCycleLength, const double& inflec, const double& ring_duration, const bool& circ_return, const bool& seq_return, const bool& ring_prop_return, const bool& output_full_return);
+RcppExport SEXP _estimatePMR_archer_fitN_odeint(SEXP parmsSEXP, SEXP dataSEXP, SEXP genoSEXP, SEXP pfCycleLengthSEXP, SEXP inflecSEXP, SEXP ring_durationSEXP, SEXP circ_returnSEXP, SEXP seq_returnSEXP, SEXP ring_prop_returnSEXP, SEXP output_full_returnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +73,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool& >::type circ_return(circ_returnSEXP);
     Rcpp::traits::input_parameter< const bool& >::type seq_return(seq_returnSEXP);
     Rcpp::traits::input_parameter< const bool& >::type ring_prop_return(ring_prop_returnSEXP);
-    rcpp_result_gen = Rcpp::wrap(archer_fitN_odeint(parms, data, geno, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return));
+    Rcpp::traits::input_parameter< const bool& >::type output_full_return(output_full_returnSEXP);
+    rcpp_result_gen = Rcpp::wrap(archer_fitN_odeint(parms, data, geno, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return, output_full_return));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -82,7 +83,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_estimatePMR_beta_starts", (DL_FUNC) &_estimatePMR_beta_starts, 4},
     {"_estimatePMR_constPMR_gammaN_ode", (DL_FUNC) &_estimatePMR_constPMR_gammaN_ode, 9},
     {"_estimatePMR_extract_parms", (DL_FUNC) &_estimatePMR_extract_parms, 4},
-    {"_estimatePMR_archer_fitN_odeint", (DL_FUNC) &_estimatePMR_archer_fitN_odeint, 9},
+    {"_estimatePMR_archer_fitN_odeint", (DL_FUNC) &_estimatePMR_archer_fitN_odeint, 10},
     {NULL, NULL, 0}
 };
 

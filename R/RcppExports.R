@@ -58,10 +58,13 @@ extract_parms <- function(parms, pfCycleLength = NA_real_, inflec = NA_real_, ri
 #' @param ring_prop_return Single logical indicating whether to output
 #'     ring proportions.
 #'     Defaults to `FALSE`.
+#' @param output_full_return Single logical indicating whether to output
+#'     full ODE output.
+#'     Defaults to `FALSE`.
 #'
 #' @export
 #'
-archer_fitN_odeint <- function(parms, data, geno, pfCycleLength = NA_real_, inflec = NA_real_, ring_duration = NA_real_, circ_return = FALSE, seq_return = FALSE, ring_prop_return = FALSE) {
-    .Call(`_estimatePMR_archer_fitN_odeint`, parms, data, geno, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return)
+archer_fitN_odeint <- function(parms, data, geno, pfCycleLength = NA_real_, inflec = NA_real_, ring_duration = NA_real_, circ_return = FALSE, seq_return = FALSE, ring_prop_return = FALSE, output_full_return = FALSE) {
+    .Call(`_estimatePMR_archer_fitN_odeint`, parms, data, geno, pfCycleLength, inflec, ring_duration, circ_return, seq_return, ring_prop_return, output_full_return)
 }
 

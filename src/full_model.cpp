@@ -135,6 +135,9 @@ NumericVector extract_parms(const NumericVector& parms,
 //' @param ring_prop_return Single logical indicating whether to output
 //'     ring proportions.
 //'     Defaults to `FALSE`.
+//' @param output_full_return Single logical indicating whether to output
+//'     full ODE output.
+//'     Defaults to `FALSE`.
 //'
 //' @export
 //'
@@ -272,33 +275,24 @@ SEXP archer_fitN_odeint(NumericVector parms,
 
 
     // ---- RETURN MODE ----
-    if (circ_return && seq_return)
-        stop("circ_return & seq_return are both true, but only 1 is allowed to be true");
-    if (circ_return && ring_prop_return)
-        stop("circ_return & ring_prop_return are both true, but only 1 is allowed to be true");
-    if (circ_return && output_full_return)
-        stop("circ_return & output_full_return are both true, but only 1 is allowed to be true");
-    if (seq_return && ring_prop_return)
-        stop("seq_return & ring_prop_return are both true, but only 1 is allowed to be true");
-    if (seq_return && output_full_return)
-        stop("seq_return & output_full_return are both true, but only 1 is allowed to be true");
-    if (ring_return && output_full_return)
-        stop("ring_return & output_full_return are both true, but only 1 is allowed to be true");
-    if (circ_return == true) {
-        return wrap(circ_iRBC_unique);
+    int n_trues = 0;
+    if (circ_return) n_trues++;
+    if (seq_return) n_trues++;
+    if (ring_prop_return) n_trues++;
+    if (output_full_return) n_trues++;
+    if (n_trues > 1) {
+        std::string err = "Of the arguments circ_return, seq_return, ";
+        err += "ring_prop_return, and output_full_return, ";
+        err += "at most 1 is allowed to be true.";
+        stop(err.c_str());
     }
-    if (seq_return == true) {
-        return wrap(seq_iRBC_unique);
-    }
-    if (ring_prop_return == true) {
-        return wrap(ring_prop_estim);
-    }
-    if(output_full_return == true){
-        return wrap(odeint_output);
-    }
-    else {
-        return wrap(sse);
-    }
+
+    if (circ_return == true) return wrap(circ_iRBC_unique);
+    if (seq_return == true) return wrap(seq_iRBC_unique);
+    if (ring_prop_return == true) return wrap(ring_prop_estim);
+    if (output_full_return == true) return wrap(odeint_output);
+
+    return wrap(sse);
 }
 
 

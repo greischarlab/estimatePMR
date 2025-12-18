@@ -147,7 +147,8 @@ SEXP archer_fitN_odeint(NumericVector parms,
                         const double& ring_duration = NA_REAL,
                         const bool& circ_return = false,
                         const bool& seq_return = false,
-                        const bool& ring_prop_return = false) {
+                        const bool& ring_prop_return = false,
+                        const bool& output_full_return = false) {
 
     ArcherInfo info = extract_parms_cpp(parms, pfCycleLength, inflec, ring_duration);
 
@@ -275,8 +276,14 @@ SEXP archer_fitN_odeint(NumericVector parms,
         stop("circ_return & seq_return are both true, but only 1 is allowed to be true");
     if (circ_return && ring_prop_return)
         stop("circ_return & ring_prop_return are both true, but only 1 is allowed to be true");
+    if (circ_return && output_full_return)
+        stop("circ_return & output_full_return are both true, but only 1 is allowed to be true");
     if (seq_return && ring_prop_return)
         stop("seq_return & ring_prop_return are both true, but only 1 is allowed to be true");
+    if (seq_return && output_full_return)
+        stop("seq_return & output_full_return are both true, but only 1 is allowed to be true");
+    if (ring_return && output_full_return)
+        stop("ring_return & output_full_return are both true, but only 1 is allowed to be true");
     if (circ_return == true) {
         return wrap(circ_iRBC_unique);
     }
@@ -286,11 +293,13 @@ SEXP archer_fitN_odeint(NumericVector parms,
     if (ring_prop_return == true) {
         return wrap(ring_prop_estim);
     }
+    if(output_full_return == true){
+        return wrap(odeint_output);
+    }
     else {
         return wrap(sse);
     }
 }
-
 
 
 

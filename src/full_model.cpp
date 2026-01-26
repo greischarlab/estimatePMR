@@ -54,7 +54,7 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     double result = std::round(1.0 / (cv_cycleLength * cv_cycleLength));
     info.n = static_cast<int>(result);
     if (info.n < 4) info.n = 4;
-    if (info.n > 800) info.n = 800;
+    if (info.n > 200) info.n = 200;
 
     int parms_idx = 5;
 

@@ -47,17 +47,8 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     info.R = std::exp((parms[2]));
 
     // param 4: I0
-<<<<<<< HEAD
-<<<<<<< HEAD
-    info.I0 = std::exp((parms[3]));
-=======
-    //info.I0 = std::exp((parms[3]));
-    info.I0 = 1e6;
->>>>>>> 2676f81 (Updated fix of I0)
-=======
     //info.I0 = std::exp((parms[3]));
     info.I0 = 10^6;
->>>>>>> origin/main
 
     // param 5: n
     double cv_cycleLength = std::exp(-std::exp(parms[4]));

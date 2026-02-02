@@ -39,7 +39,7 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     double betaShape1 =  (1 / varBetaDist) - 4;
     info.betaShape = betaShape1/8;
     if (info.betaShape < 1) info.betaShape = 1;
-    if (info.betaShape > 800) info.betaShape = 800;
+    if (info.betaShape > 1600) info.betaShape = 1600;
 
     // param 2: offset
     info.offset = std::exp(-std::exp(parms[1]));
@@ -56,13 +56,12 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
 
     int parms_idx = 4;
 
-    // param 5: pfCycleLength
+    // param 5: I0
     if (Rcpp::NumericVector::is_na(I0)) { // if there's no values specified for I0
         if (parms.size() <= parms_idx) { // if not proper length...
             stop("Not enough items for I0");
         }
-        double pfCycleLength1 = std::exp(-std::exp(parms[parms_idx]));
-        info.I0 = std::exp((parms[parms_idx]));; // then fit parms[5] for I0
+        info.I0 = std::exp((parms[parms_idx]));; // then fit parms[4] for I0
         parms_idx++;
     } else info.I0 = I0;
 

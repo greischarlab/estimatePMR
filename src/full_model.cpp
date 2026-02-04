@@ -48,7 +48,7 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     info.R = std::exp((parms[2]));
 
     // param 4: n
-    double cv_cycleLength = std::exp(-std::exp(parms[4]));
+    double cv_cycleLength = std::exp(-std::exp(parms[3]));
     double result = std::round(1.0 / (cv_cycleLength * cv_cycleLength));
     info.n = static_cast<int>(result);
     if (info.n < 4) info.n = 4;
@@ -61,7 +61,7 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
         if (parms.size() <= parms_idx) { // if not proper length...
             stop("Not enough items for I0");
         }
-        info.I0 = std::exp((parms[parms_idx]));; // then fit parms[4] for I0
+        info.I0 = std::exp((parms[parms_idx])); // then fit parms[4] for I0
         parms_idx++;
     } else info.I0 = I0;
 

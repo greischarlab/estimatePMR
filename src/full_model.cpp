@@ -22,14 +22,15 @@ using namespace Rcpp;
 
 
 ArcherInfo extract_parms_cpp(const NumericVector& parms,
+                             const double& I0,
                              const double& pfCycleLength,
                              const double& inflec,
                              const double& ring_duration) {
 
     ArcherInfo info;
 
-    if (parms.size() < 5) {
-        stop("parms must have length >= 5");
+    if (parms.size() < 4) {
+        stop("parms must have length >= 4");
     }
 
     // param 1: betaShape
@@ -38,7 +39,7 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     double betaShape1 =  (1 / varBetaDist) - 4;
     info.betaShape = betaShape1/8;
     if (info.betaShape < 1) info.betaShape = 1;
-    if (info.betaShape > 800) info.betaShape = 800;
+    if (info.betaShape > 1600) info.betaShape = 1600;
 
     // param 2: offset
     info.offset = std::exp(-std::exp(parms[1]));
@@ -46,17 +47,23 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     // param 3: R
     info.R = std::exp((parms[2]));
 
-    // param 4: I0
-    info.I0 = std::exp((parms[3]));
-
-    // param 5: n
+    // param 4: n
     double cv_cycleLength = std::exp(-std::exp(parms[4]));
     double result = std::round(1.0 / (cv_cycleLength * cv_cycleLength));
     info.n = static_cast<int>(result);
     if (info.n < 4) info.n = 4;
     if (info.n > 500) info.n = 500;
 
-    int parms_idx = 5;
+    int parms_idx = 4;
+
+    // param 5: I0
+    if (Rcpp::NumericVector::is_na(I0)) { // if there's no values specified for I0
+        if (parms.size() <= parms_idx) { // if not proper length...
+            stop("Not enough items for I0");
+        }
+        info.I0 = std::exp((parms[parms_idx]));; // then fit parms[4] for I0
+        parms_idx++;
+    } else info.I0 = I0;
 
     // param 6: pfCycleLength
     if (Rcpp::NumericVector::is_na(pfCycleLength)) { // if there's no values specified for pfCycleLength
@@ -98,14 +105,15 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
 //'
 //[[Rcpp::export]]
 NumericVector extract_parms(const NumericVector& parms,
+                            const double& I0 = NA_REAL,
                             const double& pfCycleLength = NA_REAL,
                             const double& inflec = NA_REAL,
                             const double& ring_duration = NA_REAL) {
 
-    ArcherInfo info = extract_parms_cpp(parms, pfCycleLength, inflec, ring_duration);
+    ArcherInfo info = extract_parms_cpp(parms, I0, pfCycleLength, inflec, ring_duration);
 
-    NumericVector fit_parms = {info.betaShape, info.offset, info.R, info.I0,
-                               static_cast<double>(info.n), info.pfCycleLength,
+    NumericVector fit_parms = {info.betaShape, info.offset, info.R, static_cast<double>(info.n),
+                               info.I0, info.pfCycleLength,
                                info.inflec, info.ring_duration};
 
     return fit_parms;
@@ -125,6 +133,8 @@ NumericVector extract_parms(const NumericVector& parms,
 //'     then the function is fitting the data from O'Donnell et al., Parasite
 //'     Immunology, 2021; if set as true, then the function is fitting the data
 //'     from Prior et al., Scientifc Reports, 2019).
+//' @param I0 Single numeric indicating the initial population size.
+//'     Defaults to `NA`, which results in it being extracted from `parms`.
 //' @param pfCycleLength Single numeric indicating the cycle length.
 //'     Defaults to `NA`, which results in it being extracted from `parms`.
 //' @param inflec Single numeric indicating the inflection point.
@@ -150,6 +160,7 @@ NumericVector extract_parms(const NumericVector& parms,
 SEXP archer_fitN_odeint(NumericVector parms,
                         DataFrame data,
                         const bool& geno,
+                        const double& I0 = NA_REAL,
                         const double& pfCycleLength = NA_REAL,
                         const double& inflec = NA_REAL,
                         const double& ring_duration = NA_REAL,
@@ -158,7 +169,7 @@ SEXP archer_fitN_odeint(NumericVector parms,
                         const bool& ring_prop_return = false,
                         const bool& output_full_return = false) {
 
-    ArcherInfo info = extract_parms_cpp(parms, pfCycleLength, inflec, ring_duration);
+    ArcherInfo info = extract_parms_cpp(parms, I0, pfCycleLength, inflec, ring_duration);
 
     int n = info.n;
     double n_dbl = n;

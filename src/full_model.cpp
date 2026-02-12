@@ -39,10 +39,12 @@ ArcherInfo extract_parms_cpp(const NumericVector& parms,
     double betaShape1 =  (1 / varBetaDist) - 4;
     info.betaShape = betaShape1/8;
     if (info.betaShape < 1) info.betaShape = 1;
-    if (info.betaShape > 800) info.betaShape = 800;
+    if (info.betaShape > 300) info.betaShape = 300;
 
     // param 2: offset
     info.offset = std::exp(-std::exp(parms[1]));
+    if (info.offset < 0) info.betaShape = 0;
+    if (info.offset > 0.5) info.betaShape = 0.5;
 
     // param 3: R
     info.R = std::exp((parms[2]));

@@ -8,6 +8,7 @@ archer_fitN_odeint(
   parms,
   data,
   geno,
+  I0 = NA_real_,
   pfCycleLength = NA_real_,
   inflec = NA_real_,
   ring_duration = NA_real_,
@@ -27,6 +28,9 @@ archer_fitN_odeint(
 then the function is fitting the data from O'Donnell et al., Parasite
 Immunology, 2021; if set as true, then the function is fitting the data
 from Prior et al., Scientifc Reports, 2019).}
+
+\item{I0}{Single numeric indicating the initial population size.
+Defaults to \code{NA}, which results in it being extracted from \code{parms}.}
 
 \item{pfCycleLength}{Single numeric indicating the cycle length.
 Defaults to \code{NA}, which results in it being extracted from \code{parms}.}

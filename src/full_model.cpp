@@ -1,5 +1,4 @@
 #include <RcppArmadillo.h>
-#include <Rmath.h>
 #include <cmath>
 #include <vector>
 #include <algorithm>

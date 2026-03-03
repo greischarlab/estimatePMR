@@ -6,6 +6,7 @@
 \usage{
 extract_parms(
   parms,
+  I0 = NA_real_,
   pfCycleLength = NA_real_,
   inflec = NA_real_,
   ring_duration = NA_real_

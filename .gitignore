@@ -51,3 +51,6 @@ rsconnect/
 
 # Testing folder
 _testing/*
+
+# hidden mac files
+.DS_Store

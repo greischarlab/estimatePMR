@@ -1,11 +1,13 @@
 Package: estimatePMR
 Title: Estimate Parasite Multiplication Rates
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person("Lucas A.", "Nell", , "lucnell@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3209-0517")),
     person("Zhenying", "Chen", , "zc527@cornell.edu", role = "aut",
-           comment = c(ORCID = "0009-0005-9769-2369"))
+           comment = c(ORCID = "0009-0005-9769-2369")),
+    person("Megan", "Greischar", , "megan.greischar@cornell.edu", role = "aut",
+           comment = c(ORCID = "0000-0002-7521-9344"))
   )
 Description: This package uses a "winnowing" optimization approach to estimate
     Parasite Multiplication Rates (PMRs) for malaria parasites based on data.
